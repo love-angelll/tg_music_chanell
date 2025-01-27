@@ -3,6 +3,11 @@ import requests
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CallbackContext, CommandHandler, CallbackQueryHandler, MessageHandler, filters
 
+# Вставьте ваши токены
+VK_TOKEN = "Ваш_токен_ВК"
+TG_TOKEN = "Ваш_токен_TG"
+ADS_FILE = "ads.txt"  # Файл с каналами для проверки подписки
+
 
 class VKBot:
     def __init__(self, token):
@@ -32,11 +37,11 @@ class VKBot:
         }
         response = requests.get('https://api.vk.com/method/audio.getById', params=params)
         if response.status_code == 200:
-            audio_url = response.json().get('response')[0].get('url')
-            return audio_url
-        else:
-            print(f"Ошибка при получении URL аудиозаписи: {response.status_code}")
-            return None
+            response_json = response.json()
+            if response_json.get('response'):
+                return response_json['response'][0].get('url')
+        print(f"Ошибка при получении URL аудиозаписи: {response.status_code}")
+        return None
 
     def download_audio(self, audio_url, save_path):
         try:
@@ -127,12 +132,39 @@ async def button(update: Update, context: CallbackContext) -> None:
             await query.message.reply_text("Не удалось получить URL аудиозаписи.")
 
 
-if __name__ == '__main__':
-    vk_token = 'ВК ТОКЕН'
-    bot = VKBot(vk_token)
-    tg_token = 'ТГ ТОКЕН'
+async def check_subscriptions(update: Update, context: CallbackContext) -> bool:
+    user_id = update.callback_query.from_user.id
+    if not os.path.exists(ADS_FILE):
+        return True
+    with open(ADS_FILE, 'r') as f:
+        channels = [line.strip() for line in f if line.strip()]
+    if not channels:
+        return True
 
-    application = ApplicationBuilder().token(tg_token).build()
+    not_subscribed_channels = []
+    for channel in channels:
+        try:
+            chat_member = await context.bot.get_chat_member(chat_id=channel, user_id=user_id)
+            if chat_member.status not in ['member', 'administrator', 'creator']:
+                not_subscribed_channels.append(channel)
+        except:
+            not_subscribed_channels.append(channel)
+
+    if not_subscribed_channels:
+        keyboard = [[InlineKeyboardButton('Проверить подписку', callback_data='check_subscription')]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        await update.callback_query.message.reply_text(
+            f"Пожалуйста, подпишитесь на следующие каналы:\n" + "\n".join(not_subscribed_channels),
+            reply_markup=reply_markup
+        )
+        return False
+    return True
+
+
+if __name__ == '__main__':
+    bot = VKBot(VK_TOKEN)
+
+    application = ApplicationBuilder().token(TG_TOKEN).build()
     application.add_handler(CommandHandler('start', start))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     application.add_handler(CallbackQueryHandler(button))
