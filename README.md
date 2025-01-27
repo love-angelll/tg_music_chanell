@@ -32,7 +32,7 @@
 После этого останется только ввести в код API-ключи в нужные переменные.**
 
 
-- Склонируйте репозиторий (через CMD):
+- Клонируйте репозиторий (через CMD):
 ```cmd
 git clone https://github.com/love-angelll/tg_music_chanell
 cd tg_music_chanell
