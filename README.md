@@ -1,3 +1,5 @@
+![Telegram Music Bot Banner](https://www.tunesfun.com/images/spotify-music-converter/telegram-bot.jpg)
+
 # Telegram-бот для скачивания музыки из ВК
 
 ### Описание проекта
