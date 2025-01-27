@@ -41,9 +41,8 @@ pip install -r requirements.txt
 
 - Настройте переменные окружения в файле:
 ```
-self.token = token : токен для доступа к API ВКонтакте.
-self.api_version = '5.131'
-TELEGRAM_BOT_TOKEN: токен вашего Telegram-бота.
+vk_token = 'ВК ТОКЕН' : Токен ВК. (Kate Mobile)
+tg_token = 'ТГ ТОКЕН' : Токен бота Вк.
 ```
 
 
@@ -56,9 +55,7 @@ python main.py
 ### Команды бота:
 ```
 /start — начало работы с ботом.
-
 /help — список доступных команд.
-
 /search [название песни] — поиск трека.
 ```
 
